@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import javax.servlet.FilterChain;
@@ -17,6 +18,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Arrays;
 
 /**
  * Authentication filter.
@@ -60,7 +62,13 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
         final var userDetails = (UserDetails) authResult.getPrincipal();
 
+        final var roles = Arrays.toString(userDetails.getAuthorities()
+                .stream()
+                .map(GrantedAuthority::getAuthority)
+                .toArray());
+
         response.addHeader("token", jwtUtils.generateToken(userDetails));
         response.addHeader("userId", userDetails.getId().toString());
+        response.addHeader("roles", roles);
     }
 }
